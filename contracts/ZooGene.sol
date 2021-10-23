@@ -23,7 +23,7 @@ contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Access
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "https://abc.com/ipfs";
+        return "https://openzoo.mypinata.cloud/ipfs/";
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {
@@ -34,8 +34,9 @@ contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Access
         _unpause();
     }
 
-    function safeMint(address to) public onlyRole(MINTER_ROLE) {
+    function safeMint(address to, string calldata uri) public onlyRole(MINTER_ROLE) {
         _safeMint(to, _tokenIdCounter.current());
+        _setTokenURI(_tokenIdCounter.current(), uri);
         _tokenIdCounter.increment();
     }
 
@@ -44,6 +45,7 @@ contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Access
         whenNotPaused
         override(ERC721, ERC721Enumerable)
     {
+        require(to != address(this), "can not transfer to self sc");
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
