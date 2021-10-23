@@ -7,12 +7,13 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
 
-    
+    event BuyZooGene(address indexed _user, uint256 priceInUsd, uint256 priceInWan);
 
     function initialize(address _admin) initializer public {
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
+    
 
 }
 
