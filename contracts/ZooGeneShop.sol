@@ -88,5 +88,9 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
             result := mload(add(source, 32))
         }
     }
+
+    function redeem() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        payable(msg.sender).transfer(address(this).balance);
+    }
 }
 
