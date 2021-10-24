@@ -48,7 +48,11 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
         });
     }
 
-    function buy() external payable {
+    receive() external payable {
+        buy();
+    }
+
+    function buy() public payable {
         NftPhaseInfo storage info = phaseInfo[currentPhase];
         uint wanNeed = getWanPriceByUSD(info.usdPrice);
         require(msg.value >= wanNeed, "WAN not enough");
