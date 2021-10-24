@@ -34,7 +34,7 @@ contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Access
         _unpause();
     }
 
-    function safeMint(address to, string calldata uri) public onlyRole(MINTER_ROLE) {
+    function safeMint(address to, string calldata uri) public onlyRole(MINTER_ROLE) whenNotPaused {
         _safeMint(to, _tokenIdCounter.current());
         _setTokenURI(_tokenIdCounter.current(), uri);
         _tokenIdCounter.increment();
