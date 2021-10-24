@@ -9,7 +9,12 @@ interface IOracle {
     function getValue(bytes32 key) external view returns(uint);
 }
 
+interface IZooGene {
+    function safeMint(address to, string calldata uri) external;
+}
+
 contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
+
 
     struct NftPhaseInfo {
         uint maxCount;
@@ -23,11 +28,20 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
 
     uint public currentPhase;
 
+    address[] public mintQueue;
+
+    address public zooGene;
+
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
     event BuyZooGene(address indexed _user, uint256 priceInUsd, uint256 priceInWan);
 
-    function initialize(address _admin, address _priceOracle) initializer public {
+    event MintFinish(address indexed _user, string uri);
+
+    function initialize(address _admin, address _priceOracle, address _zooGene) initializer public {
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
         priceOracle = _priceOracle;
+        zooGene = _zooGene;
 
         phaseInfo[0] = NftPhaseInfo({
             maxCount: 5000,
@@ -61,6 +75,7 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
             payable(msg.sender).transfer(msg.value - wanNeed);
         }
         info.soldCount++;
+        mintQueue.push(msg.sender);
         emit BuyZooGene(msg.sender, info.usdPrice, wanNeed);
     }
 
@@ -92,5 +107,27 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
     function redeem() external onlyRole(DEFAULT_ADMIN_ROLE) {
         payable(msg.sender).transfer(address(this).balance);
     }
+
+    function queueLength() public view returns(uint) {
+        return mintQueue.length;
+    }
+
+    function addMinterRole(address _minter) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setupRole(MINTER_ROLE, _minter);
+    }
+
+    function configZooGene(address _zooGene) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        zooGene = _zooGene;
+    }
+
+    function mint(string calldata uri) external onlyRole(MINTER_ROLE) {
+        if (mintQueue.length == 0) {
+            return;
+        }
+        address user = mintQueue[mintQueue.length - 1];
+        mintQueue.pop();
+        IZooGene(zooGene).safeMint(user, uri);
+        emit MintFinish(user, uri);
+    } 
 }
 
