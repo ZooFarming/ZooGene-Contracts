@@ -11,6 +11,7 @@ interface IOracle {
 
 interface IZooGene {
     function safeMint(address to, string calldata uri) external;
+    function totalSupply() external view returns (uint256);
 }
 
 contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
@@ -118,6 +119,10 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
 
     function configZooGene(address _zooGene) external onlyRole(DEFAULT_ADMIN_ROLE) {
         zooGene = _zooGene;
+    }
+
+    function getNextId() public view returns (uint) {
+        return IZooGene(zooGene).totalSupply() + 1;
     }
 
     function mint(string calldata uri) external onlyRole(MINTER_ROLE) {
