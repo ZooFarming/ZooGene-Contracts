@@ -15,15 +15,22 @@ contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Access
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
+    string public baseUri;
 
     constructor() ERC721("ZooGene", "ZooGene") {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(PAUSER_ROLE, msg.sender);
         _setupRole(MINTER_ROLE, msg.sender);
+        _tokenIdCounter.increment();
+        baseUri = "https://openzoo.mypinata.cloud/ipfs/";
     }
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "https://openzoo.mypinata.cloud/ipfs/";
+    function _baseURI() internal view override returns (string memory) {
+        return baseUri;
+    }
+
+    function configBaseURI(string calldata uri) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        baseUri = uri;
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {
