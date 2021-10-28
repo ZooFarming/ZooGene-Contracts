@@ -23,6 +23,7 @@ contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Access
         _setupRole(MINTER_ROLE, msg.sender);
         _tokenIdCounter.increment();
         baseUri = "https://openzoo.mypinata.cloud/ipfs/";
+        _pause();
     }
 
     function _baseURI() internal view override returns (string memory) {

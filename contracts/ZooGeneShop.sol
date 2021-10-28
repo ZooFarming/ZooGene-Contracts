@@ -45,7 +45,7 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
         zooGene = _zooGene;
 
         phaseInfo[0] = NftPhaseInfo({
-            maxCount: 5000,
+            maxCount: 4000,
             soldCount: 0,
             usdPrice: 60 ether
         });
@@ -53,13 +53,13 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
         phaseInfo[1] = NftPhaseInfo({
             maxCount: 3000,
             soldCount: 0,
-            usdPrice: 100 ether
+            usdPrice: 70 ether
         });
 
         phaseInfo[2] = NftPhaseInfo({
-            maxCount: 2000,
+            maxCount: 3000,
             soldCount: 0,
-            usdPrice: 120 ether
+            usdPrice: 80 ether
         });
     }
 
