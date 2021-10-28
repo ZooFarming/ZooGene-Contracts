@@ -4,6 +4,8 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+
 
 interface IOracle {
     function getValue(bytes32 key) external view returns(uint);
@@ -14,7 +16,7 @@ interface IZooGene {
     function totalSupply() external view returns (uint256);
 }
 
-contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
+contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
 
 
     struct NftPhaseInfo {
@@ -61,13 +63,14 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
             soldCount: 0,
             usdPrice: 80 ether
         });
+        _pause();
     }
 
     receive() external payable {
         buy();
     }
 
-    function buy() public payable {
+    function buy() public whenNotPaused payable {
         NftPhaseInfo storage info = phaseInfo[currentPhase];
         uint wanNeed = getWanPriceByUSD(info.usdPrice);
         require(msg.value >= wanNeed, "WAN not enough");
@@ -78,6 +81,14 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable {
         info.soldCount++;
         mintQueue.push(msg.sender);
         emit BuyZooGene(msg.sender, info.usdPrice, wanNeed);
+    }
+
+    function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+
+    function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
     }
 
     function updatePhaseInfo(uint _phase, uint _maxCount, uint _usdPrice) external onlyRole(DEFAULT_ADMIN_ROLE) {
