@@ -33,13 +33,15 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
 
     address[] public mintQueue;
 
+    mapping(address => uint) public userInQueue;
+
     address public zooGene;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    event BuyZooGene(address indexed _user, uint256 priceInUsd, uint256 priceInWan);
+    event BuyZooGene(address indexed _user, uint256 priceInUsd, uint256 priceInWan, uint256 tokenId);
 
-    event MintFinish(address indexed _user, string uri);
+    event MintFinish(address indexed _user, string uri, uint256 tokenId);
 
     function initialize(address _admin, address _priceOracle, address _zooGene) initializer public {
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -71,6 +73,8 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
     }
 
     function buy() public whenNotPaused payable {
+        require(tx.origin == msg.sender, "not allow sc call");
+        require(userInQueue[msg.sender] == 0, "user already in queue");
         NftPhaseInfo storage info = phaseInfo[currentPhase];
         uint wanNeed = getWanPriceByUSD(info.usdPrice);
         require(msg.value >= wanNeed, "WAN not enough");
@@ -80,7 +84,8 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
         }
         info.soldCount++;
         mintQueue.push(msg.sender);
-        emit BuyZooGene(msg.sender, info.usdPrice, wanNeed);
+        userInQueue[msg.sender] = mintQueue.length;
+        emit BuyZooGene(msg.sender, info.usdPrice, wanNeed, mintQueue.length);
     }
 
     function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -121,7 +126,11 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
     }
 
     function queueLength() public view returns(uint) {
-        return mintQueue.length;
+        return mintQueue.length - IZooGene(zooGene).totalSupply();
+    }
+
+    function userQueuePosition(address user) public view returns(uint) {
+        return userInQueue[user] - IZooGene(zooGene).totalSupply();
     }
 
     function addMinterRole(address _minter) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -137,13 +146,15 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
     }
 
     function mint(string calldata uri) external onlyRole(MINTER_ROLE) {
-        if (mintQueue.length == 0) {
+        uint totalSupply = IZooGene(zooGene).totalSupply();
+        if (mintQueue.length <= totalSupply) {
             return;
         }
-        address user = mintQueue[mintQueue.length - 1];
-        mintQueue.pop();
+
+        address user = mintQueue[totalSupply];
         IZooGene(zooGene).safeMint(user, uri);
-        emit MintFinish(user, uri);
+        emit MintFinish(user, uri, userInQueue[user]);
+        userInQueue[user] = 0;
     } 
 }
 
