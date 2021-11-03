@@ -130,6 +130,9 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
     }
 
     function userQueuePosition(address user) public view returns(uint) {
+        if (userInQueue[user] <= IZooGene(zooGene).totalSupply()) {
+            return 0;
+        }
         return userInQueue[user] - IZooGene(zooGene).totalSupply();
     }
 
