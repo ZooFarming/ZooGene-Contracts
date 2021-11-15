@@ -68,11 +68,7 @@ contract ZooGeneShop is AccessControl, ERC721Holder, Initializable, Pausable {
         _pause();
     }
 
-    receive() external payable {
-        buy();
-    }
-
-    function buy() public whenNotPaused payable {
+    function buy() internal whenNotPaused {
         require(tx.origin == msg.sender, "not allow sc call");
         require(userInQueue[msg.sender] == 0, "user already in queue");
         NftPhaseInfo storage info = phaseInfo[currentPhase];
