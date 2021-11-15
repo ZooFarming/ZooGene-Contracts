@@ -32,6 +32,10 @@ contract ZooGeneShopV2 is ZooGeneShop {
         emit MintFinish(user, uri, userInQueue[user]);
         userInQueue[user] = 0;
     }
+    
+    function unban(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        banned[user] = 0;
+    }
 
     function configBannedMintTo(address _mintTo) external onlyRole(DEFAULT_ADMIN_ROLE) {
         bannedNftMintTo = _mintTo;
