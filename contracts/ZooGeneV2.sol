@@ -9,7 +9,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     constructor(address initialOwner)
-        ERC721("ZooGene", "ZooGene")
+        ERC721("ZooGenes", "ZooGenes")
         Ownable(initialOwner)
     {}
 
