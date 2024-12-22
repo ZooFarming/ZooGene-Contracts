@@ -21,6 +21,10 @@ contract ZooGene is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, uri);
     }
 
+    function safeBurn(uint256 tokenId) external onlyOwner {
+        _burn(tokenId);
+    }
+
     function safeBatchMint(address[] memory users, uint256[] memory tokenIds, string[] memory uris)
         public
         onlyOwner
